@@ -1,4 +1,52 @@
+//First we need users coordinates/ a way to pass the information by:
 
+const myMap = {
+    coordinates:[],
+    businesses:[],
+    map: {},
+    markers: {},
+ //Second, we need a place to put these coordinates. we will be using leaflet to make a map like in our previous assignments:
+ buildMap() {
+    this.map = L.map('map', {
+    center: this.coordinates,
+    zoom: 11,
+    });
+    // add openstreetmap tiles, recycleing code:
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    minZoom: '15',
+    }).addTo(this.map)
+    // Create and add the location with a marker
+    const marker = L.marker(this.coordinates)
+    marker
+    .addTo(this.map)
+    .bindPopup('<p1><b>You Are Here</b><br></p1>')
+    .openPopup()
+},
+
+// add business markers
+}
+//Now that we have the basics we can get the coordinates:
+async function getCoords(){
+	const pos = await new Promise((resolve, reject) => {
+		navigator.geolocation.getCurrentPosition(resolve, reject)
+	});
+	return [pos.coords.latitude, pos.coords.longitude]
+}
+window.onload = async () => {
+	const coords = await getCoords()
+	console.log(coords)
+	myMap.coordinates = coords
+	myMap.buildMap()
+}
+
+//Business submit button, we need to edit it so it looks 
+document.getElementById('submit').addEventListener('click', async (event) => {
+	event.preventDefault()
+	let business = document.getElementById('business').value
+	console.log(business)
+})
 
 
 /////////////////////////////////CODE CREATED WITH LEAF TO MAKE A MAP ///////////////////////////////////////////////////////////
