@@ -34,7 +34,7 @@ const myMap = {
 		])
 			.bindPopup(`<p1>${this.businesses[i].name}</p1>`)
 			.addTo(this.map)
-            .openPopup()
+            //.openPopup()
 		}
 	},
 
@@ -65,6 +65,7 @@ async function getFoursquare(business) {
 	let businesses = parsedData.results
 	return businesses
 
+    //Could not get my markers to populate, checked against the solution and nothing worked, access to cors was on and off.
     // Requested temporary access to cors-anywhere through https://cors-anywhere.herokuapp.com/ still got error 403 forbidden
 }
  /////////////////////////////////This was the outline foursquare gave it needs to be updated just to receive the date and use that to plug it into leaflet
