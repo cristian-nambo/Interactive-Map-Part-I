@@ -23,29 +23,97 @@ const myMap = {
     .addTo(this.map)
     .bindPopup('<p1><b>You Are Here</b><br></p1>')
     .openPopup()
-},
+    },
+    //Cheated a little here, we needed a for function/loop with an incrementor to add markers to the Map.
+    addMarkers() {
+		for (var i = 0; 
+            i < this.businesses.length; i++) {
+		this.markers = L.marker([
+			this.businesses[i].lat,
+			this.businesses[i].long,
+		])
+			.bindPopup(`<p1>${this.businesses[i].name}</p1>`)
+			.addTo(this.map)
+            .openPopup()
+		}
+	},
 
-// add business markers
 }
-//Now that we have the basics we can get the coordinates:
+///////Now that we have the basics we can get the user's coordinates://////////////////////////////////////////////////////////
 async function getCoords(){
 	const pos = await new Promise((resolve, reject) => {
 		navigator.geolocation.getCurrentPosition(resolve, reject)
 	});
 	return [pos.coords.latitude, pos.coords.longitude]
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+async function getFoursquare(business) {
+	const options = {
+		method: 'GET',
+		headers: {
+		Accept: 'application/json',
+		Authorization: 'fsq3VC4vFx3WlPsNvnVDBHOKmUPynM1I+R6bvIx/JsGe0K0='
+		}
+	}
+	let limit = 5
+	let lat = myMap.coordinates[0]
+	let lon = myMap.coordinates[1]
+	let response = await fetch(`https://cors-anywhere.herokuapp.com/https://api.foursquare.com/v3/places/search?&query=${business}&limit=${limit}&ll=${lat}%2C${lon}`, options)
+	let data = await response.text()
+	let parsedData = JSON.parse(data)
+	let businesses = parsedData.results
+	return businesses
+
+    // Requested temporary access to cors-anywhere through https://cors-anywhere.herokuapp.com/ still got error 403 forbidden
+}
+ /////////////////////////////////This was the outline foursquare gave it needs to be updated just to receive the date and use that to plug it into leaflet
+ ////////////////////////////////We will process the data in the next step using the function
+    // const options = {
+    //     method: 'GET',
+    //     headers: {
+    //       accept: 'application/json',
+    //       Authorization: 'fsq3VC4vFx3WlPsNvnVDBHOKmUPynM1I+R6bvIx/JsGe0K0='
+    //     }
+    //   };
+      
+    //   fetch('https://api.foursquare.com/v3/places/search?query=query&ll=12%2C12&limit=5', options)
+    //     .then(response => response.json())
+    //     .then(response => console.log(response))
+    //     .catch(err => console.error(err));    
+
+
+// Process foursquare array
+function processBusinesses(data) {
+	let businesses = data.map((element) => {
+		let location = {
+			name: element.name,
+			lat: element.geocodes.main.latitude,
+			long: element.geocodes.main.longitude
+		};
+		return location
+	})
+	return businesses
+}
+
+
+
+
 window.onload = async () => {
 	const coords = await getCoords()
-	console.log(coords)
+	console.log(coords) //to polish up the code we will comment out these.
 	myMap.coordinates = coords
 	myMap.buildMap()
 }
 
-//Business submit button, we need to edit it so it looks 
+//Business submit button, Needs to do what we tell it to find.
 document.getElementById('submit').addEventListener('click', async (event) => {
 	event.preventDefault()
 	let business = document.getElementById('business').value
-	console.log(business)
+    let data = await getFoursquare(business)
+    myMap.business = processBusinesses(data)
+    myMap.addMarkers() 
+	console.log(business)// to polish up the code we will comment out these, 
 })
 
 
